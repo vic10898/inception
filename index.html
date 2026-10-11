@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Архитектура снов: Интерактивная схема фильма «Начало»</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+  <script>
+    /* Declaring configuration prior to script injection prevents race-condition ReferenceErrors */
+    window.tailwind = window.tailwind || {};
+    window.tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Cinzel', 'serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            inception: {
+              dark: '#080c14',
+              card: '#0f172a',
+              accent: '#38bdf8',
+              amber: '#f59e0b',
+              crimson: '#ef4444',
+              ice: '#93c5fd',
+              limbo: '#6366f1'
+            }
+          }
+        }
+      }
+    };
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    body {
+      background-color: #050811;
+      color: #f1f5f9;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .glass-panel-active {
+      border-color: rgba(56, 189, 248, 0.5);
+      box-shadow: 0 0 25px rgba(56, 189, 248, 0.2);
+    }
+
+    /* Spinning Totem CSS */
+    .totem-spin {
+      animation: spinForever 0.4s linear infinite;
+    }
+    .totem-wobble {
+      animation: wobbleAndFall 2.4s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+    }
+
+    @keyframes spinForever {
+      0% { transform: rotateY(0deg); }
+      100% { transform: rotateY(360deg); }
+    }
+
+    @keyframes wobbleAndFall {
+      0% { transform: rotateY(0deg) rotateZ(0deg); }
+      40% { transform: rotateY(720deg) rotateZ(8deg); }
+      70% { transform: rotateY(1100deg) rotateZ(-18deg); }
+      90% { transform: rotateY(1300deg) rotateZ(45deg); }
+      100% { transform: rotateY(1380deg) rotateZ(85deg) translateY(12px); opacity: 0.85; }
+    }
+
+    /* Custom scrollbar for horizontal mobile strips */
+    .hide-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .hide-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .pulse-glow {
+      box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans antialiased text-slate-200 overflow-x-hidden pb-24">
+
+  <header class="sticky top-0 z-50 glass-panel border-b border-slate-800/80 px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div id="totem-header-btn" class="w-10 h-10 rounded-full bg-slate-800/90 border border-sky-400/30 flex items-center justify-center cursor-pointer active:scale-95 transition-transform" title="Кликните, чтобы запустить тотем">
+        <svg id="totem-icon" class="w-6 h-6 text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2v3M8 6h8M7 9h10l-2 9h-6L7 9zM12 18v4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div>
+        <h1 class="text-base font-display font-bold tracking-wider text-slate-100 flex items-center gap-1.5">
+          НАЧАЛО <span class="text-xs px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-400 font-mono">INCEPTION</span>
+        </h1>
+        <p class="text-[10px] text-slate-400 font-mono tracking-tight" id="reality-status">ТОТЕМ: СТАБИЛЕН (РЕАЛЬНОСТЬ)</p>
+      </div>
+    </div>
+    
+    <button id="sound-toggle-btn" class="text-xs font-mono px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/60 hover:bg-slate-700/60 text-slate-300 flex items-center gap-1.5 transition-colors">
+      <span id="sound-dot" class="w-2 h-2 rounded-full bg-slate-500"></span>
+      <span id="sound-label">ЗВУК: ВЫКЛ</span>
+    </button>
+  </header>
+
+  <nav class="p-3 bg-slate-950/60 border-b border-slate-900 sticky top-[57px] z-40 backdrop-blur-md">
+    <div class="flex items-center gap-2 overflow-x-auto hide-scrollbar max-w-4xl mx-auto px-1">
+      <button class="nav-tab active px-3.5 py-2 rounded-xl text-xs font-medium whitespace-nowrap bg-sky-500/20 text-sky-300 border border-sky-500/40 flex items-center gap-1.5 transition-all" data-target="levels-view">
+        <span>🗺️</span> 5 Уровней сна
+      </button>
+      <button class="nav-tab px-3.5 py-2 rounded-xl text-xs font-medium whitespace-nowrap bg-slate-900/80 text-slate-400 border border-slate-800 flex items-center gap-1.5 hover:text-slate-200 transition-all" data-target="kick-view">
+        <span>⚡</span> Симулятор «Выброса»
+      </button>
+      <button class="nav-tab px-3.5 py-2 rounded-xl text-xs font-medium whitespace-nowrap bg-slate-900/80 text-slate-400 border border-slate-800 flex items-center gap-1.5 hover:text-slate-200 transition-all" data-target="characters-view">
+        <span>👥</span> Роли и маршруты
+      </button>
+      <button class="nav-tab px-3.5 py-2 rounded-xl text-xs font-medium whitespace-nowrap bg-slate-900/80 text-slate-400 border border-slate-800 flex items-center gap-1.5 hover:text-slate-200 transition-all" data-target="rules-view">
+        <span>🌀</span> Правила и Тотемы
+      </button>
+    </div>
+  </nav>
+
+  <main class="flex-1 max-w-4xl w-full mx-auto p-4 space-y-6">
+
+    <!-- VIEW 1: LEVELS EXPLORER -->
+    <section id="levels-view" class="view-panel space-y-4">
+      <div class="glass-panel p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h2 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            Архитектурный срез погружения
+          </h2>
+          <p class="text-xs text-slate-400 mt-0.5">Нажимайте на карточки уровней для анализа физики и участников</p>
+        </div>
+        <div class="flex items-center gap-2 text-[11px] font-mono text-slate-400 bg-slate-950/60 px-3 py-1.5 rounded-lg border border-slate-800">
+          <span>Синхронизация снотворного:</span>
+          <span class="text-amber-400 font-bold">100% (Седатив Юсуфа)</span>
+        </div>
+      </div>
+
+      <!-- Level selector pills -->
+      <div class="grid grid-cols-5 gap-1.5 p-1 bg-slate-950/70 rounded-xl border border-slate-800/80">
+        <button class="lvl-btn active py-2 text-center rounded-lg text-xs font-mono transition-all bg-sky-500/20 text-sky-300 font-bold border border-sky-400/40" data-level="0">L0: Борт</button>
+        <button class="lvl-btn py-2 text-center rounded-lg text-xs font-mono transition-all text-slate-400 hover:text-slate-200" data-level="1">L1: Дождь</button>
+        <button class="lvl-btn py-2 text-center rounded-lg text-xs font-mono transition-all text-slate-400 hover:text-slate-200" data-level="2">L2: Отель</button>
+        <button class="lvl-btn py-2 text-center rounded-lg text-xs font-mono transition-all text-slate-400 hover:text-slate-200" data-level="3">L3: Горы</button>
+        <button class="lvl-btn py-2 text-center rounded-lg text-xs font-mono transition-all text-slate-400 hover:text-slate-200" data-level="4">L4: Лимб</button>
+      </div>
+
+      <!-- Dynamic Level Card Container -->
+      <div id="level-detail-card" class="glass-panel rounded-2xl p-5 border transition-all duration-300">
+        <!-- Injected via JavaScript -->
+      </div>
+
+      <!-- Visual Hierarchy Diagram -->
+      <div class="glass-panel rounded-2xl p-4 space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xs font-mono uppercase tracking-wider text-slate-400">Сквозной вертикальный граф сна</h3>
+          <span class="text-[10px] text-sky-400 font-mono">Физика передается сверху вниз ↓</span>
+        </div>
+
+        <div class="space-y-2 text-xs font-mono">
+          <div class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 flex items-center justify-between">
+            <span class="text-slate-200 font-bold">0. Boeing 747 (Реальность)</span>
+            <span class="text-slate-400 text-[11px]">10 часов рейса</span>
+          </div>
+          <div class="pl-4 border-l-2 border-sky-500/40 space-y-2 ml-3">
+            <div class="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800/90 flex items-center justify-between">
+              <span class="text-sky-300">1. Сон Юсуфа (Дождливый город)</span>
+              <span class="text-amber-400/90 text-[11px]">~1 неделя • Фургон</span>
+            </div>
+            <div class="pl-4 border-l-2 border-amber-500/40 space-y-2 ml-2">
+              <div class="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800/90 flex items-center justify-between">
+                <span class="text-amber-300">2. Сон Артура (Отель)</span>
+                <span class="text-amber-400/90 text-[11px]">~6 месяцев • Невесомость</span>
+              </div>
+              <div class="pl-4 border-l-2 border-indigo-500/40 space-y-2 ml-2">
+                <div class="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800/90 flex items-center justify-between">
+                  <span class="text-blue-200">3. Сон Имса (Снежная база)</span>
+                  <span class="text-indigo-400/90 text-[11px]">~10 лет • Сейф</span>
+                </div>
+                <div class="pl-4 border-l-2 border-red-500/40 ml-2">
+                  <div class="p-2.5 rounded-xl bg-rose-950/30 border border-rose-900/50 flex items-center justify-between">
+                    <span class="text-rose-300 font-bold">4. Лимб (Глубокое подсознание)</span>
+                    <span class="text-rose-400 text-[11px]">Бесконечность • Риск потери разума</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 2: THE KICK SIMULATOR -->
+    <section id="kick-view" class="view-panel hidden space-y-4">
+      <div class="glass-panel p-5 rounded-2xl space-y-3">
+        <div class="flex items-center justify-between">
+          <h2 class="text-base font-bold text-slate-100 flex items-center gap-2">
+            <span>⚡</span> Синхронизация «Выброса» (The Kick)
+          </h2>
+          <span class="text-xs font-mono text-sky-400 bg-sky-500/10 px-2.5 py-1 rounded-full border border-sky-400/20">Edith Piaf: 2:28</span>
+        </div>
+        <p class="text-xs text-slate-300 leading-relaxed">
+          Седатив Юсуфа настолько глубок, что обычное пробуждение невозможно. Единственный путь назад — 
+          <strong class="text-sky-300">каскадный одновременный вестибулярный шок («пинок»)</strong>, 
+          согласованный через музыкальный сигнал таймера.
+        </p>
+
+        <!-- Kick Controls -->
+        <div class="flex items-center gap-3 pt-2">
+          <button id="start-kick-btn" class="flex-1 py-3 px-4 rounded-xl font-bold text-xs uppercase tracking-wider bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-slate-950 shadow-lg shadow-sky-500/25 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            Запустить цепочку выброса
+          </button>
+          <button id="reset-kick-btn" class="px-4 py-3 rounded-xl text-xs font-mono bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors">
+            Сброс
+          </button>
+        </div>
+      </div>
+
+      <!-- Kick Cascade Timeline Steps -->
+      <div class="space-y-3" id="kick-steps-container">
+        <!-- Step 1: Limbo Jump -->
+        <div class="kick-step p-4 rounded-2xl glass-panel border-l-4 border-l-rose-500 transition-all opacity-60" data-step="1">
+          <div class="flex items-start justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-6 h-6 rounded-full bg-rose-500/20 text-rose-400 font-mono text-xs flex items-center justify-center font-bold">1</span>
+              <h4 class="text-sm font-semibold text-rose-300">Прыжок из Лимба</h4>
+            </div>
+            <span class="text-[11px] font-mono text-rose-400 status-pill">ОЖИДАНИЕ</span>
+          </div>
+          <p class="text-xs text-slate-300 mt-2">
+            Ариадна сталкивает Фишера с высотного балкона разрушенного города и спрыгивает следом. Шок от удара выталкивает их сознание обратно на 3-й уровень.
+          </p>
+        </div>
+
+        <!-- Step 2: Level 3 Fortress Explosion -->
+        <div class="kick-step p-4 rounded-2xl glass-panel border-l-4 border-l-blue-400 transition-all opacity-60" data-step="2">
+          <div class="flex items-start justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-6 h-6 rounded-full bg-blue-500/20 text-blue-400 font-mono text-xs flex items-center justify-center font-bold">2</span>
+              <h4 class="text-sm font-semibold text-blue-300">Уровень 3: Взрыв крепости и дефибриллятор</h4>
+            </div>
+            <span class="text-[11px] font-mono text-blue-400 status-pill">ОЖИДАНИЕ</span>
+          </div>
+          <p class="text-xs text-slate-300 mt-2">
+            Имс реанимирует Фишера дефибриллятором (чтобы тот открыл сейф), затем подрывает фундамент крепости. Взрыв здания обрушивает пол и запускает падение.
+          </p>
+        </div>
+
+        <!-- Step 3: Level 2 Zero-G Elevator Drop -->
+        <div class="kick-step p-4 rounded-2xl glass-panel border-l-4 border-l-amber-400 transition-all opacity-60" data-step="3">
+          <div class="flex items-start justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-6 h-6 rounded-full bg-amber-500/20 text-amber-400 font-mono text-xs flex items-center justify-center font-bold">3</span>
+              <h4 class="text-sm font-semibold text-amber-300">Уровень 2: Взрыв тросов лифта в невесомости</h4>
+            </div>
+            <span class="text-[11px] font-mono text-amber-400 status-pill">ОЖИДАНИЕ</span>
+          </div>
+          <p class="text-xs text-slate-300 mt-2">
+            Поскольку гравитации нет из-за падения фургона, Артур связывает команду, заталкивает в лифт и взрывает заряды. Взрыв разгоняет кабину, создавая искусственную силу тяжести и ускорение при ударе.
+          </p>
+        </div>
+
+        <!-- Step 4: Level 1 Van Hits Water -->
+        <div class="kick-step p-4 rounded-2xl glass-panel border-l-4 border-l-sky-400 transition-all opacity-60" data-step="4">
+          <div class="flex items-start justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-6 h-6 rounded-full bg-sky-500/20 text-sky-400 font-mono text-xs flex items-center justify-center font-bold">4</span>
+              <h4 class="text-sm font-semibold text-sky-300">Уровень 1: Удар фургона о воду</h4>
+            </div>
+            <span class="text-[11px] font-mono text-sky-400 status-pill">ОЖИДАНИЕ</span>
+          </div>
+          <p class="text-xs text-slate-300 mt-2">
+            Фургон Юсуфа пробивает ограждение моста и со страшной силой врезается в реку. Момент удара воды синхронизирован с взрывом лифта Артура и падением крепости Имса.
+          </p>
+        </div>
+
+        <!-- Step 5: Level 0 Wake up in Plane -->
+        <div class="kick-step p-4 rounded-2xl glass-panel border-l-4 border-l-emerald-400 transition-all opacity-60" data-step="5">
+          <div class="flex items-start justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 font-mono text-xs flex items-center justify-center font-bold">5</span>
+              <h4 class="text-sm font-semibold text-emerald-300">Уровень 0: Пробуждение в салоне самолета</h4>
+            </div>
+            <span class="text-[11px] font-mono text-emerald-400 status-pill">ОЖИДАНИЕ</span>
+          </div>
+          <p class="text-xs text-slate-300 mt-2">
+            Идея внедрена в подсознание Фишера. Действие седатива подходит к концу. Команда просыпается в креслах рейса 747 перед посадкой в Лос-Анджелесе. Сайто совершает обещанный телефонный звонок.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 3: CHARACTERS MATRIX -->
+    <section id="characters-view" class="view-panel hidden space-y-4">
+      <div class="glass-panel p-4 rounded-2xl space-y-2">
+        <h2 class="text-sm font-bold text-slate-100 flex items-center gap-2">
+          <span>👥</span> Персонажи и маршруты погружения
+        </h2>
+        <p class="text-xs text-slate-400">Выберите персонажа, чтобы отследить его точную роль на каждом слое сновидения</p>
+        
+        <!-- Character Selector Chips -->
+        <div class="flex items-center gap-2 overflow-x-auto hide-scrollbar pt-2">
+          <button class="char-chip active px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap bg-sky-500 text-slate-950 font-bold" data-char="cobb">Дом Кобб</button>
+          <button class="char-chip px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap bg-slate-800 text-slate-300 hover:text-white" data-char="ariadne">Ариадна</button>
+          <button class="char-chip px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap bg-slate-800 text-slate-300 hover:text-white" data-char="arthur">Артур</button>
+          <button class="char-chip px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap bg-slate-800 text-slate-300 hover:text-white" data-char="eames">Имс</button>
+          <button class="char-chip px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap bg-slate-800 text-slate-300 hover:text-white" data-char="yusuf">Юсуф</button>
+          <button class="char-chip px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap bg-slate-800 text-slate-300 hover:text-white" data-char="fischer">Роберт Фишер</button>
+          <button class="char-chip px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap bg-slate-800 text-slate-300 hover:text-white" data-char="saito">Сайто</button>
+          <button class="char-chip px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap bg-slate-800 text-slate-300 hover:text-white" data-char="mal">Мэл (Проекция)</button>
+        </div>
+      </div>
+
+      <!-- Character Detail Card -->
+      <div id="character-detail-container" class="glass-panel rounded-2xl p-5 border border-slate-800 space-y-4">
+        <!-- Injected via JavaScript -->
+      </div>
+    </section>
+
+    <!-- VIEW 4: RULES & TOTEMS -->
+    <section id="rules-view" class="view-panel hidden space-y-4">
+      <!-- Interactive Totem Playground -->
+      <div class="glass-panel p-5 rounded-2xl space-y-4 border border-sky-500/20">
+        <div class="flex items-center justify-between">
+          <h2 class="text-sm font-bold text-slate-100 flex items-center gap-2">
+            <span>🌀</span> Интерактивный тотем Кобба
+          </h2>
+          <span class="text-[10px] font-mono text-sky-400 bg-sky-500/10 px-2 py-0.5 rounded">Тест реальности</span>
+        </div>
+
+        <div class="flex flex-col items-center justify-center py-6 bg-slate-950/60 rounded-xl border border-slate-900">
+          <div id="interactive-spinner" class="w-20 h-20 flex items-center justify-center cursor-pointer transition-transform">
+            <!-- Totem Top SVG Graphic -->
+            <svg class="w-16 h-16 drop-shadow-[0_0_12px_rgba(56,189,248,0.5)]" viewBox="0 0 100 100" fill="none">
+              <path d="M50 10 L50 25" stroke="#38bdf8" stroke-width="4" stroke-linecap="round"/>
+              <ellipse cx="50" cy="27" rx="14" ry="4" fill="#0284c7" stroke="#38bdf8" stroke-width="2"/>
+              <path d="M22 45 C22 35, 78 35, 78 45 L54 82 C52 86, 48 86, 46 82 Z" fill="url(#metalGrad)" stroke="#38bdf8" stroke-width="2.5"/>
+              <circle cx="50" cy="85" r="3.5" fill="#f8fafc"/>
+              <defs>
+                <linearGradient id="metalGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#475569"/>
+                  <stop offset="50%" stop-color="#94a3b8"/>
+                  <stop offset="100%" stop-color="#1e293b"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+          <p id="totem-result-text" class="text-xs font-mono text-slate-400 mt-4 text-center">
+            Нажмите на волчок, чтобы крутануть
+          </p>
+          <div class="flex items-center gap-3 mt-4">
+            <button id="spin-real-btn" class="px-3.5 py-1.5 rounded-lg text-xs font-mono bg-slate-800 hover:bg-slate-700 text-sky-300 border border-slate-700">
+              Запустить (Реальность: упадет)
+            </button>
+            <button id="spin-dream-btn" class="px-3.5 py-1.5 rounded-lg text-xs font-mono bg-slate-800 hover:bg-slate-700 text-rose-300 border border-slate-700">
+              Запустить (Сон: вечно)
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Totems Showcase -->
+      <div class="glass-panel p-4 rounded-2xl space-y-3">
+        <h3 class="text-xs font-mono uppercase tracking-wider text-slate-400">Тотемы участников миссии</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+          <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800 space-y-1">
+            <div class="flex items-center justify-between font-bold text-slate-200">
+              <span>Волчок Кобба (ранее Мэл)</span>
+              <span class="text-sky-400">🌀</span>
+            </div>
+            <p class="text-slate-400 text-[11px]">Во сне крутится бесконечно без трения; в реальности теряет импульс и падает.</p>
+          </div>
+
+          <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800 space-y-1">
+            <div class="flex items-center justify-between font-bold text-slate-200">
+              <span>Утяжеленный кубик Артура</span>
+              <span class="text-amber-400">🎲</span>
+            </div>
+            <p class="text-slate-400 text-[11px]">Имеет смещенный центр тяжести. Только Артур знает точный вес и вероятность выпадения грани.</p>
+          </div>
+
+          <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800 space-y-1">
+            <div class="flex items-center justify-between font-bold text-slate-200">
+              <span>Бронзовый шахматный ферзь Ариадны</span>
+              <span class="text-emerald-400">♟️</span>
+            </div>
+            <p class="text-slate-400 text-[11px]">Особое распределение веса и просверленная полость внутри известны только ей.</p>
+          </div>
+
+          <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800 space-y-1">
+            <div class="flex items-center justify-between font-bold text-slate-200">
+              <span>Покерная фишка Имса</span>
+              <span class="text-purple-400">🎰</span>
+            </div>
+            <p class="text-slate-400 text-[11px]">Имеет скрытый дефект тиснения, который невозможно воспроизвести чужому подсознанию.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Core Physics Rules -->
+      <div class="glass-panel p-4 rounded-2xl space-y-3">
+        <h3 class="text-xs font-mono uppercase tracking-wider text-slate-400">Законы механики внедрения (Inception)</h3>
+        <div class="space-y-2 text-xs text-slate-300">
+          <div class="flex items-start gap-2.5 p-2 rounded-lg bg-slate-950/40">
+            <span class="text-amber-400 font-bold font-mono">01</span>
+            <p><strong>Замедление времени:</strong> Каждый новый уровень умножает субъективное время примерно в 20 раз (минуты → часы → дни → годы).</p>
+          </div>
+          <div class="flex items-start gap-2.5 p-2 rounded-lg bg-slate-950/40">
+            <span class="text-amber-400 font-bold font-mono">02</span>
+            <p><strong>Трансляция физики:</strong> Любое ускорение или потеря опоры на верхнем уровне мгновенно переносится на нижние уровни (падение вэна вызывает невесомость в отеле Артура).</p>
+          </div>
+          <div class="flex items-start gap-2.5 p-2 rounded-lg bg-slate-950/40">
+            <span class="text-rose-400 font-bold font-mono">03</span>
+            <p><strong>Ловушка Лимба:</strong> Если субъект погибает под действием глубокого седатива, он не просыпается, а проваливается в неструктурированный Лимб, рискуя забыть реальность на десятилетия.</p>
+          </div>
+          <div class="flex items-start gap-2.5 p-2 rounded-lg bg-slate-950/40">
+            <span class="text-sky-400 font-bold font-mono">04</span>
+            <p><strong>Подсознательная защита:</strong> Разум Фишера был предварительно натренирован частными инструкторами — его проекции вооружены и атакуют команду Кобба как антитела.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    /* Level Data Definition */
+    const levelsData = [
+      {
+        id: 0,
+        badge: "УРОВЕНЬ 0: РЕАЛЬНОСТЬ",
+        title: "Рейс Сидней — Лос-Анджелес (Boeing 747)",
+        timeDilation: "10 часов реального полета",
+        dreamer: "Реальный мир (Нет сновидца)",
+        guard: "Стюардесса рейса (бортпроводник куплен Сайто)",
+        diving: "Дом Кобб, Артур, Ариадна, Имс, Юсуф, Сайто, Роберт Фишер",
+        purpose: "Собрать всех в салоне первого класса, подмешать Фишеру снотворное в стакан воды и синхронно подключить устройство PASIV для совместного сновидения.",
+        physics: "Стандартная земная гравитация на высоте 10 000 метров.",
+        risk: "Если кто-то заметит процесс или самолет приземлится раньше завершения — Кобба арестуют прямо у трапа.",
+        accentColor: "border-emerald-500/50",
+        badgeColor: "bg-emerald-500/20 text-emerald-400"
+      },
+      {
+        id: 1,
+        badge: "УРОВЕНЬ 1: СНОВИДЕНИЕ ЮСУФА",
+        title: "Дождливый ночной мегаполис",
+        timeDilation: "~1 неделя субъективного времени",
+        dreamer: "Юсуф (Химик команды)",
+        guard: "Юсуф (управляет белым фургоном, уходя от погони)",
+        diving: "Кобб, Артур, Ариадна, Имс, Сайто, Фишер",
+        purpose: "Похитить Фишера, оказать психологическое давление через образ Питера Браунинга (дяди), выведать первые случайные цифры шифра сейфа отца.",
+        physics: "Юсуф выпил слишком много шампанского перед сном, поэтому в городе идет проливной ливень. Движение фургона сотрясает мир сновидения.",
+        risk: "Милитаризованные проекции подсознания Фишера открывают огонь на поражение. Сайто тяжело ранен в грудь и начинает медленно умирать.",
+        accentColor: "border-sky-500/50",
+        badgeColor: "bg-sky-500/20 text-sky-400"
+      },
+      {
+        id: 2,
+        badge: "УРОВЕНЬ 2: СНОВИДЕНИЕ АРТУРА",
+        title: "Элитный отель (Номер 528)",
+        timeDilation: "~6 месяцев субъективного времени",
+        dreamer: "Артур (Проводник)",
+        guard: "Артур (остается в коридорах отеля, координирует лифт)",
+        diving: "Кобб, Ариадна, Имс, Сайто, Фишер",
+        purpose: "Применить протокол «Мистер Чарльз»: Кобб раскрывает Фишеру, что тот спит, и притворяется его начальником службы безопасности, заставляя Фишера самого захотеть проникнуть глубже.",
+        physics: "Фургон Юсуфа на Уровне 1 падает с моста в воду. Из-за этого гравитация в отеле исчезает — коридоры и комнаты переходят в состояние полной невесомости.",
+        risk: "Артуру приходится вручную перемещать летающие тела спящих товарищей и придумывать альтернативный взрывной пинок без гравитации.",
+        accentColor: "border-amber-500/50",
+        badgeColor: "bg-amber-500/20 text-amber-400"
+      },
+      {
+        id: 3,
+        badge: "УРОВЕНЬ 3: СНОВИДЕНИЕ ИМСА",
+        title: "Заснеженная горная военная крепость",
+        timeDilation: "~10 лет субъективного времени",
+        dreamer: "Имс (Имитатор)",
+        guard: "Имс (ведет снайперский бой и прикрывает периметр базы)",
+        diving: "Кобб и Ариадна (вынужденный спуск в Лимб за Фишером)",
+        purpose: "Проникнуть в защищенное хранилище. Фишер должен открыть сейф с умирающим отцом и достать бумажную вертушку — символ того, что отец хотел видеть его самостоятельным, а не копией себя.",
+        physics: "Колебания отеля Артура вызывают снежные лавины на склонах гор.",
+        risk: "Проекция Мэл внезапно стреляет в Фишера и убивает его. Раненого Фишера утягивает в Лимб. Сайто также умирает от ран первого уровня.",
+        accentColor: "border-blue-500/50",
+        badgeColor: "bg-blue-500/20 text-blue-400"
+      },
+      {
+        id: 4,
+        badge: "УРОВЕНЬ 4: ЛИМБ",
+        title: "Глубокое неструктурированное подсознание",
+        timeDilation: "Десятилетия / субъективная бесконечность",
+        dreamer: "Общее сырое подсознание (город, построенный Коббом и Мэл)",
+        guard: "Никого (потеря контроля над связью с реальностью)",
+        diving: "Кобб, Ариадна, Фишер, Сайто",
+        purpose: "Спасти душу Фишера от вечного забвения (вернуть к дефибриллятору) и найти состарившегося Сайто, чтобы исполнить контракт и вернуться к детям.",
+        physics: "Разрушающиеся небоскребы на берегу океана времени. Забвение реальности — человек забывает, что спит.",
+        risk: "Риск провести полвека и состариться разумом, как старик Сайто в своем японском дворце со стражниками.",
+        accentColor: "border-rose-500/50",
+        badgeColor: "bg-rose-500/20 text-rose-400"
+      }
+    ];
+
+    /* Character Data Definition */
+    const charactersData = {
+      cobb: {
+        name: "Доминик (Дом) Кобб",
+        role: "Извлекатель / Лидер миссии (Extractor)",
+        totem: "Волчок (ранее принадлежал его жене Мэл)",
+        avatar: "🧭",
+        l0: "Подключает оборудование в самолете, контролирует ход погружения.",
+        l1: "Допрашивает Фишера в гараже; борется с проекцией поезда из своего подсознания.",
+        l2: "Активирует протокол «Мистер Чарльз», убеждая Фишера исследовать тайны собственного разума.",
+        l3: "Штурмует крепость; не может выстрелить в проекцию Мэл, из-за чего та убивает Фишера.",
+        l4: "Спускается в Лимб, окончательно прощается с проекцией Мэл, находит дряхлого Сайто и напоминает ему о реальности."
+      },
+      ariadne: {
+        name: "Ариадна",
+        role: "Архитектор снов (Architect)",
+        totem: "Утяжеленный бронзовый шахматный ферзь",
+        avatar: "📐",
+        l0: "Подключена в самолете под контролем Кобба.",
+        l1: "Спроектировала лабиринт дождливого города с мостами и кольцевыми развязками.",
+        l2: "Спроектировала запутанные коридоры и лифтовые шахты отеля.",
+        l3: "Спроектировала геометрию и систему вентиляции горной крепости; направляет команду через тайные ходы.",
+        l4: "Спускается вместе с Коббом, сталкивает Фишера с карниза для выброса и прыгает сама, возвращаясь на уровень 3."
+      },
+      arthur: {
+        name: "Артур",
+        role: "Проводник / Координатор (The Point Man)",
+        totem: "Смещенный игральный кубик",
+        avatar: "🎲",
+        l0: "Проверяет готовность оборудования и паспорта команды на борту.",
+        l1: "Принимает участие в захвате такси и обороне фургона Юсуфа.",
+        l2: "Остается спящим хозяином отеля. В невесомости связывает товарищей, минирует лифт и обеспечивает синхронный выброс.",
+        l3: "Тело находится в невесомости в лифте отеля.",
+        l4: "Не спускался."
+      },
+      eames: {
+        name: "Имс",
+        role: "Имитатор / Фальсификатор (The Forger)",
+        totem: "Покерная фишка с неровным кантом",
+        avatar: "🎭",
+        l0: "Занимает соседнее кресло рядом с Фишером на рейсе 747.",
+        l1: "Принимает облик Питера Браунинга, внушая Фишеру подозрения о завещании отца.",
+        l2: "Продолжает играть роль Браунинга в баре отеля, заманивая Фишера в ловушку.",
+        l3: "Хозяин сновидения военной базы. Защищает базу со снайперской винтовкой, реанимирует Фишера и взрывает опоры.",
+        l4: "Не спускался."
+      },
+      yusuf: {
+        name: "Юсуф",
+        role: "Химик / Фармаколог (The Chemist)",
+        totem: "Нет собственного тотема (создатель сверхкрепкого седатива)",
+        avatar: "🧪",
+        l0: "Приготовил смесь сомноцина для одновременного тройного сна.",
+        l1: "Хозяин первого сновидения. Ведет белый фургон через весь город под обстрелом, пробивает ограждение моста.",
+        l2: "Тело находится за рулем фургона в падении.",
+        l3: "Не спускался.",
+        l4: "Не спускался."
+      },
+      fischer: {
+        name: "Роберт Фишер",
+        role: "Объект внедрения (The Mark / Цель)",
+        totem: "Бумажная вертушка из сейфа отца (символический якорь)",
+        avatar: "💼",
+        l0: "Наследник многомиллиардной энергетической корпорации Maurice Fischer.",
+        l1: "Похищен бандой Кобба; ранен в плечо; под давлением называет первые пришедшие в голову цифры.",
+        l2: "Верит Коббу («Мистер Чарльз»), считая, что его похитители — сотрудники службы безопасности Браунинга.",
+        l3: "Убит проекцией Мэл у дверей хранилища; его сознание проваливается в Лимб.",
+        l4: "Возвращен Ариадной через падение; на Уровне 3 открывает сейф отца и принимает решение разделить монополию."
+      },
+      saito: {
+        name: "Сайто",
+        role: "Заказчик / «Турист» (The Tourist)",
+        totem: "Слово чести / Телефонный звонок в миграционную службу",
+        avatar: "🚁",
+        l0: "Купил авиакомпанию, чтобы обеспечить 10 часов конфиденциального полета.",
+        l1: "Получает пулевое ранение в грудь от боевиков Фишера; слабеет из-за действия седатива.",
+        l2: "С трудом удерживает сознание в отеле, прикрывает отход группы.",
+        l3: "Умирает от ран в снежной крепости и первым проваливается в глубины Лимба.",
+        l4: "Стареет на 50 лет в одиночестве в японском замке, пока Кобб не находит его и не напоминает о соглашении."
+      },
+      mal: {
+        name: "Мэл Кобб (Проекция)",
+        role: "Тень подсознания Кобба (The Shade)",
+        totem: "Оригинальный волчок (оставлен в кукольном домике)",
+        avatar: "🥀",
+        l0: "Погибла за годы до событий фильма, спрыгнув из окна отеля.",
+        l1: "Прорывается сквозь подсознание Кобба в виде грузового поезда прямо на улице города.",
+        l2: "Появляется на экранах и в лифте отеля как скрытая угроза.",
+        l3: "Проникает в вентиляцию крепости и смертельно стреляет в Фишера.",
+        l4: "Обитает в воссозданном доме в Лимбе; пытается убедить Кобба остаться с ней навсегда."
+      }
+    };
+
+    let audioCtx = null;
+    let soundEnabled = false;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    // Iconic Brass Horn "BRAAAM"
+    function playBraamSound() {
+      if (!soundEnabled || !audioCtx) return;
+      try {
+        const osc1 = audioCtx.createOscillator();
+        const osc2 = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        const filter = audioCtx.createBiquadFilter();
+
+        osc1.type = 'sawtooth';
+        osc2.type = 'triangle';
+
+        // Detuned low brass notes
+        osc1.frequency.setValueAtTime(55, audioCtx.currentTime); // A1
+        osc2.frequency.setValueAtTime(56.2, audioCtx.currentTime);
+
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(150, audioCtx.currentTime);
+        filter.frequency.exponentialRampToValueAtTime(1400, audioCtx.currentTime + 0.3);
+        filter.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 1.8);
+
+        gainNode.gain.setValueAtTime(0.01, audioCtx.currentTime);
+        gainNode.gain.linearRampToValueAtTime(0.4, audioCtx.currentTime + 0.15);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 2.0);
+
+        osc1.connect(filter);
+        osc2.connect(filter);
+        filter.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        osc1.start();
+        osc2.start();
+        osc1.stop(audioCtx.currentTime + 2.1);
+        osc2.stop(audioCtx.currentTime + 2.1);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    // Sub-bass Kick impact sound
+    function playKickImpactSound() {
+      if (!soundEnabled || !audioCtx) return;
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(140, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(32, audioCtx.currentTime + 0.45);
+
+        gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.5);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    // Tick sound for timer / countdown
+    function playTickSound() {
+      if (!soundEnabled || !audioCtx) return;
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+
+        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.09);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    // Tab switching
+    const navTabs = document.querySelectorAll('.nav-tab');
+    const viewPanels = document.querySelectorAll('.view-panel');
+
+    navTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        navTabs.forEach(t => {
+          t.classList.remove('active', 'bg-sky-500/20', 'text-sky-300', 'border-sky-500/40');
+          t.classList.add('bg-slate-900/80', 'text-slate-400', 'border-slate-800');
+        });
+        tab.classList.add('active', 'bg-sky-500/20', 'text-sky-300', 'border-sky-500/40');
+        tab.classList.remove('bg-slate-900/80', 'text-slate-400', 'border-slate-800');
+
+        const targetId = tab.dataset.target;
+        viewPanels.forEach(panel => {
+          if (panel.id === targetId) {
+            panel.classList.remove('hidden');
+          } else {
+            panel.classList.add('hidden');
+          }
+        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    });
+
+    // Sound toggle
+    const soundBtn = document.getElementById('sound-toggle-btn');
+    const soundDot = document.getElementById('sound-dot');
+    const soundLabel = document.getElementById('sound-label');
+
+    soundBtn.addEventListener('click', () => {
+      initAudio();
+      soundEnabled = !soundEnabled;
+      if (soundEnabled) {
+        soundDot.classList.remove('bg-slate-500');
+        soundDot.classList.add('bg-emerald-400', 'animate-pulse');
+        soundLabel.textContent = 'ЗВУК: ВКЛ';
+        playBraamSound();
+      } else {
+        soundDot.classList.add('bg-slate-500');
+        soundDot.classList.remove('bg-emerald-400', 'animate-pulse');
+        soundLabel.textContent = 'ЗВУК: ВЫКЛ';
+      }
+    });
+
+    // Level Viewer Rendering
+    const levelDetailCard = document.getElementById('level-detail-card');
+    const levelBtns = document.querySelectorAll('.lvl-btn');
+
+    function renderLevel(lvlIndex) {
+      const data = levelsData[lvlIndex];
+      levelDetailCard.className = `glass-panel rounded-2xl p-5 border ${data.accentColor} transition-all duration-300 space-y-4`;
+      levelDetailCard.innerHTML = `
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-mono px-2.5 py-1 rounded-md ${data.badgeColor} font-bold">${data.badge}</span>
+          <span class="text-xs font-mono text-slate-400">${data.timeDilation}</span>
+        </div>
+        <h3 class="text-base font-bold text-slate-100">${data.title}</h3>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs pt-1">
+          <div class="p-3 rounded-xl bg-slate-950/60 border border-slate-900">
+            <span class="text-[10px] text-slate-400 font-mono block">ХОЗЯИН СНА / АРХИТЕКТОР</span>
+            <span class="font-semibold text-sky-300">${data.dreamer}</span>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-950/60 border border-slate-900">
+            <span class="text-[10px] text-slate-400 font-mono block">КТО ОСТАЕТСЯ НА ЗАЩИТЕ / ВЫБРОС</span>
+            <span class="font-semibold text-amber-300">${data.guard}</span>
+          </div>
+        </div>
+
+        <div class="p-3 rounded-xl bg-slate-950/60 border border-slate-900 text-xs">
+          <span class="text-[10px] text-slate-400 font-mono block">КТО ПОГРУЖАЕТСЯ ГЛУБЖЕ</span>
+          <span class="text-slate-200">${data.diving}</span>
+        </div>
+
+        <div class="space-y-2 text-xs">
+          <div class="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
+            <strong class="text-sky-300 block mb-0.5">🎯 Стратегия и Цель (Зачем?):</strong>
+            <p class="text-slate-300 leading-relaxed">${data.purpose}</p>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
+            <strong class="text-amber-300 block mb-0.5">🌐 Влияние физики и вестибулярной связи:</strong>
+            <p class="text-slate-300 leading-relaxed">${data.physics}</p>
+          </div>
+          <div class="p-3 rounded-xl bg-rose-950/20 border border-rose-900/40">
+            <strong class="text-rose-300 block mb-0.5">⚠️ Главная угроза уровня:</strong>
+            <p class="text-slate-300 leading-relaxed">${data.risk}</p>
+          </div>
+        </div>
+      `;
+    }
+
+    levelBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        levelBtns.forEach(b => {
+          b.classList.remove('active', 'bg-sky-500/20', 'text-sky-300', 'font-bold', 'border', 'border-sky-400/40');
+          b.classList.add('text-slate-400');
+        });
+        btn.classList.add('active', 'bg-sky-500/20', 'text-sky-300', 'font-bold', 'border', 'border-sky-400/40');
+        btn.classList.remove('text-slate-400');
+        renderLevel(parseInt(btn.dataset.level));
+        playTickSound();
+      });
+    });
+
+    renderLevel(0);
+
+    const charChips = document.querySelectorAll('.char-chip');
+    const charContainer = document.getElementById('character-detail-container');
+
+    function renderCharacter(charKey) {
+      const char = charactersData[charKey];
+      charContainer.innerHTML = `
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-2xl bg-sky-500/10 border border-sky-400/30 flex items-center justify-center text-2xl">
+            ${char.avatar}
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-slate-100">${char.name}</h3>
+            <p class="text-xs font-mono text-sky-400">${char.role}</p>
+          </div>
+        </div>
+
+        <div class="p-2.5 rounded-xl bg-slate-950/70 border border-slate-800 text-xs flex items-center justify-between">
+          <span class="text-slate-400">Личный тотем:</span>
+          <span class="font-mono text-amber-300 font-semibold">${char.totem}</span>
+        </div>
+
+        <div class="space-y-2 pt-1 text-xs">
+          <div class="p-2.5 rounded-xl bg-slate-900/70 border border-slate-800">
+            <span class="text-[10px] font-mono text-emerald-400 font-bold block">УРОВЕНЬ 0 • САМОЛЕТ</span>
+            <p class="text-slate-300 mt-0.5">${char.l0}</p>
+          </div>
+          <div class="p-2.5 rounded-xl bg-slate-900/70 border border-slate-800">
+            <span class="text-[10px] font-mono text-sky-400 font-bold block">УРОВЕНЬ 1 • ДОЖДЛИВЫЙ ГОРОД</span>
+            <p class="text-slate-300 mt-0.5">${char.l1}</p>
+          </div>
+          <div class="p-2.5 rounded-xl bg-slate-900/70 border border-slate-800">
+            <span class="text-[10px] font-mono text-amber-400 font-bold block">УРОВЕНЬ 2 • ОТЕЛЬ</span>
+            <p class="text-slate-300 mt-0.5">${char.l2}</p>
+          </div>
+          <div class="p-2.5 rounded-xl bg-slate-900/70 border border-slate-800">
+            <span class="text-[10px] font-mono text-blue-400 font-bold block">УРОВЕНЬ 3 • СНЕЖНАЯ БАЗА</span>
+            <p class="text-slate-300 mt-0.5">${char.l3}</p>
+          </div>
+          <div class="p-2.5 rounded-xl bg-rose-950/20 border border-rose-900/40">
+            <span class="text-[10px] font-mono text-rose-400 font-bold block">УРОВЕНЬ 4 • ЛИМБ</span>
+            <p class="text-slate-300 mt-0.5">${char.l4}</p>
+          </div>
+        </div>
+      `;
+    }
+
+    charChips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        charChips.forEach(c => {
+          c.classList.remove('active', 'bg-sky-500', 'text-slate-950', 'font-bold');
+          c.classList.add('bg-slate-800', 'text-slate-300');
+        });
+        chip.classList.add('active', 'bg-sky-500', 'text-slate-950', 'font-bold');
+        chip.classList.remove('bg-slate-800', 'text-slate-300');
+        renderCharacter(chip.dataset.char);
+        playTickSound();
+      });
+    });
+
+    renderCharacter('cobb');
+
+    const startKickBtn = document.getElementById('start-kick-btn');
+    const resetKickBtn = document.getElementById('reset-kick-btn');
+    const kickSteps = document.querySelectorAll('.kick-step');
+    let isKicking = false;
+    let kickTimeouts = [];
+
+    function resetKickSequence() {
+      kickTimeouts.forEach(t => clearTimeout(t));
+      kickTimeouts = [];
+      isKicking = false;
+      kickSteps.forEach(step => {
+        step.classList.remove('opacity-100', 'pulse-glow', 'border-emerald-500');
+        step.classList.add('opacity-60');
+        const pill = step.querySelector('.status-pill');
+        pill.textContent = 'ОЖИДАНИЕ';
+        pill.className = 'text-[11px] font-mono text-slate-500 status-pill';
+      });
+      startKickBtn.disabled = false;
+      startKickBtn.classList.remove('opacity-50');
+    }
+
+    function runKickSequence() {
+      if (isKicking) return;
+      isKicking = true;
+      initAudio();
+      startKickBtn.disabled = true;
+      startKickBtn.classList.add('opacity-50');
+
+      playBraamSound();
+
+      const delays = [300, 2200, 4200, 6200, 8200];
+
+      kickSteps.forEach((step, idx) => {
+        const timeout = setTimeout(() => {
+          step.classList.remove('opacity-60');
+          step.classList.add('opacity-100', 'pulse-glow');
+          const pill = step.querySelector('.status-pill');
+          pill.textContent = 'ВЫПОЛНЕНО ✓';
+          pill.className = 'text-[11px] font-mono text-emerald-400 font-bold status-pill';
+          
+          playKickImpactSound();
+
+          if (idx === kickSteps.length - 1) {
+            isKicking = false;
+            startKickBtn.disabled = false;
+            startKickBtn.classList.remove('opacity-50');
+            playBraamSound();
+          }
+        }, delays[idx]);
+        kickTimeouts.push(timeout);
+      });
+    }
+
+    startKickBtn.addEventListener('click', runKickSequence);
+    resetKickBtn.addEventListener('click', resetKickSequence);
+
+    const spinner = document.getElementById('interactive-spinner');
+    const totemResultText = document.getElementById('totem-result-text');
+    const spinRealBtn = document.getElementById('spin-real-btn');
+    const spinDreamBtn = document.getElementById('spin-dream-btn');
+    const headerTotemBtn = document.getElementById('totem-header-btn');
+    const headerTotemIcon = document.getElementById('totem-icon');
+    const realityStatus = document.getElementById('reality-status');
+
+    let currentSpinState = null;
+
+    function triggerSpin(mode) {
+      initAudio();
+      playTickSound();
+      spinner.classList.remove('totem-spin', 'totem-wobble');
+      void spinner.offsetWidth; // Force CSS reflow
+
+      if (mode === 'dream') {
+        spinner.classList.add('totem-spin');
+        totemResultText.innerHTML = '<span class="text-rose-400 font-bold">ВРАЩАЕТСЯ БЕСКОНЕЧНО... ВЫ ВСЕ ЕЩЕ ВО СНЕ! ⚠️</span>';
+        realityStatus.textContent = 'ТОТЕМ: ВРАЩЕНИЕ (ВЫ ВО СНЕ)';
+        realityStatus.className = 'text-[10px] text-rose-400 font-mono tracking-tight font-bold';
+      } else {
+        spinner.classList.add('totem-spin');
+        totemResultText.innerHTML = '<span class="text-sky-400">Вращение... замеряем импульс</span>';
+        setTimeout(() => {
+          spinner.classList.remove('totem-spin');
+          spinner.classList.add('totem-wobble');
+          totemResultText.innerHTML = '<span class="text-emerald-400 font-bold">ВОЛЧОК ПОТЕРЯЛ СКОРОСТЬ И УПАЛ. ВЫ В РЕАЛЬНОСТИ. ✓</span>';
+          realityStatus.textContent = 'ТОТЕМ: СТАБИЛЕН (РЕАЛЬНОСТЬ)';
+          realityStatus.className = 'text-[10px] text-slate-400 font-mono tracking-tight';
+        }, 1800);
+      }
+    }
+
+    spinner.addEventListener('click', () => {
+      // Alternate between real and dream on direct click
+      if (currentSpinState === 'dream') {
+        currentSpinState = 'real';
+        triggerSpin('real');
+      } else {
+        currentSpinState = 'dream';
+        triggerSpin('dream');
+      }
+    });
+
+    spinRealBtn.addEventListener('click', () => {
+      currentSpinState = 'real';
+      triggerSpin('real');
+    });
+
+    spinDreamBtn.addEventListener('click', () => {
+      currentSpinState = 'dream';
+      triggerSpin('dream');
+    });
+
+    // Header totem button shortcut
+    headerTotemBtn.addEventListener('click', () => {
+      headerTotemIcon.classList.toggle('animate-spin');
+      initAudio();
+      playBraamSound();
+      const isDream = headerTotemIcon.classList.contains('animate-spin');
+      if (isDream) {
+        realityStatus.textContent = 'ТОТЕМ: ВРАЩАЕТСЯ (ЛИМБ)';
+        realityStatus.className = 'text-[10px] text-rose-400 font-mono font-bold animate-pulse';
+      } else {
+        realityStatus.textContent = 'ТОТЕМ: ОСТАНОВИЛСЯ (РЕАЛЬНОСТЬ)';
+        realityStatus.className = 'text-[10px] text-emerald-400 font-mono';
+      }
+    });
+  </script>
+</body>
+</html>
